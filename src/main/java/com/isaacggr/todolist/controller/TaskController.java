@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/tasks")
-@CrossOrigin(origins = {"https://todolist-frontend.onrender.com", "https://isaacggr.github.io"})
+@CrossOrigin(origins = {"https://todolist-frontend-dt9a.onrender.com", "https://todolist-frontend.onrender.com", "https://isaacggr.github.io"})
 public class TaskController {
     
     // Simulação de banco de dados em memória
