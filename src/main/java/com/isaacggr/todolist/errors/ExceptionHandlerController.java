@@ -6,6 +6,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import com.mongodb.MongoException;
+import com.mongodb.MongoTimeoutException;
 
 @ControllerAdvice
 public class ExceptionHandlerController {
@@ -26,5 +28,17 @@ public class ExceptionHandlerController {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(MongoTimeoutException.class)
+    public ResponseEntity<String> handleMongoTimeoutException(MongoTimeoutException e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body("Erro de conexão com o banco de dados: " + e.getMessage());
+    }
+
+    @ExceptionHandler(MongoException.class)
+    public ResponseEntity<String> handleMongoException(MongoException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Erro no banco de dados: " + e.getMessage());
     }
 }

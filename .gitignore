@@ -34,3 +34,11 @@ build/
 
 ### macOS ###
 .DS_Store
+
+### frontend ###
+/frontend/
+/todolist-frontend/
+
+### Configurações locais ###
+application-dev.properties
+application-local.properties

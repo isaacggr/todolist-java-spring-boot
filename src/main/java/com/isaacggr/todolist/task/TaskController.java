@@ -2,7 +2,6 @@ package com.isaacggr.todolist.task;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,7 +30,7 @@ public class TaskController {
     public ResponseEntity<?> create(@Valid @RequestBody TaskModel taskModel, HttpServletRequest request) {
         try {
             var idUser = request.getAttribute("idUser");
-            taskModel.setIdUser(UUID.fromString(idUser.toString()));
+            taskModel.setIdUser(idUser.toString());
 
             var currentDate = LocalDateTime.now();
             if (currentDate.isAfter(taskModel.getStartAt()) || currentDate.isAfter(taskModel.getEndAt())) {
@@ -43,29 +42,25 @@ public class TaskController {
                         .body("Data de início deve ser menor do que a data de término");
             }
 
+            taskModel.setCreatedAt(LocalDateTime.now());
             var task = this.taskRepository.save(taskModel);
             return ResponseEntity.status(HttpStatus.OK).body(task);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());
         }
     }
 
-
     @GetMapping("/")
     public List<TaskModel> list(HttpServletRequest request) {
         var idUser = request.getAttribute("idUser");
-        var tasks = this.taskRepository.findByIdUser((UUID) idUser);
+        var tasks = this.taskRepository.findByIdUser(idUser.toString());
         return tasks;
     }
-    // http://localhost:8080/tasks/67584657843-gsfgfsgsf-467834682
+
     @PutMapping("/{id}")
-    public ResponseEntity<?> updated(@Valid @RequestBody TaskModel taskModel, HttpServletRequest request, @PathVariable UUID id) {
+    public ResponseEntity<?> update(@PathVariable String id, @Valid @RequestBody TaskModel taskModel, HttpServletRequest request) {
         try {
-            // Log dos dados recebidos
-            System.out.println("ID da Tarefa recebido: " + id);
-            System.out.println("Dados da Tarefa recebidos: " + taskModel.toString());
-            
             var task = this.taskRepository.findById(id);
             if (task.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -73,46 +68,23 @@ public class TaskController {
             }
 
             var idUser = request.getAttribute("idUser");
-            if (idUser == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Usuário não identificado");
+            if (!task.get().getIdUser().equals(idUser.toString())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Você não tem permissão para alterar esta tarefa");
             }
 
-            // Verificar se a tarefa pertence ao usuário
-            TaskModel existingTask = task.get();
-            if (!existingTask.getIdUser().equals(UUID.fromString(idUser.toString()))) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Usuário não tem permissão para atualizar esta tarefa");
-            }
-
-            // Atualizar apenas os campos fornecidos
-            try {
-                Utils.copyNonNullProperties(taskModel, existingTask);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(e.getMessage());
-            }
+            Utils.copyNonNullProperties(taskModel, task.get());
             
-            // Validar datas se foram fornecidas
-            if (existingTask.getStartAt() != null && existingTask.getEndAt() != null) {
-                var currentDate = LocalDateTime.now();
-                if (currentDate.isAfter(existingTask.getStartAt()) || currentDate.isAfter(existingTask.getEndAt())) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("Data de início ou término não pode ser anterior à data atual");
-                }
-                if (existingTask.getStartAt().isAfter(existingTask.getEndAt())) {
+            if (task.get().getStartAt() != null && task.get().getEndAt() != null) {
+                if (task.get().getStartAt().isAfter(task.get().getEndAt())) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body("Data de início deve ser menor do que a data de término");
                 }
             }
 
-            // Salvar tarefa atualizada
-            var updatedTask = this.taskRepository.save(existingTask);
+            var updatedTask = this.taskRepository.save(task.get());
             return ResponseEntity.ok(updatedTask);
-
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Erro ao atualizar tarefa: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erro ao atualizar tarefa: " + e.getMessage());
         }

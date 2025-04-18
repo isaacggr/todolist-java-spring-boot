@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class FilterTaskAuth  extends OncePerRequestFilter { 
+public class FilterTaskAuth extends OncePerRequestFilter {
 
     @Autowired
     private IUserRepository userRepository;
@@ -28,9 +28,8 @@ public class FilterTaskAuth  extends OncePerRequestFilter {
 
         var servletPath = request.getServletPath();
         
-        // Verifica se a rota começa com /tasks/
-        if (servletPath.startsWith("/tasks/")){
-            // pegar a autenticação (usuario e senha)
+        if (servletPath.startsWith("/tasks/")) {
+            // Pegar a autenticação (usuario e senha)
             var authorization = request.getHeader("Authorization");
             
             if(authorization == null) {
@@ -46,16 +45,17 @@ public class FilterTaskAuth  extends OncePerRequestFilter {
             String username = credentials[0];
             String password = credentials[1];
 
-            // validar usuario
+            // Validar usuario
             var user = this.userRepository.findByUsername(username);
             if (user == null) {
                 response.sendError(401, "Usuário não encontrado");
                 return;
             }
 
-            // validar senha
+            // Validar senha
             var passwordVerify = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword());
             if (passwordVerify.verified) {
+                // Aqui estamos usando o ID do MongoDB (String)
                 request.setAttribute("idUser", user.getId());
                 filterChain.doFilter(request, response);
             } else {
@@ -65,5 +65,4 @@ public class FilterTaskAuth  extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         }
     }
-
 }

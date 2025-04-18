@@ -1,29 +1,28 @@
 package com.isaacggr.todolist.user;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 import lombok.Data;
 
 @Data
-@Entity(name = "tb_users")
+@Document(collection = "users")
+@CompoundIndex(def = "{'username': 1}", unique = true)
 public class UserModel {
-
+    
     @Id
-    @GeneratedValue(generator = "UUID")
-    private UUID id;
-
-    @Column(unique = true)
-    private String username;
-    private String password;
+    private String id;
+    
     private String name;
-
-    @CreationTimestamp
+    
+    @Indexed(unique = true)
+    private String username;
+    
+    private String password;
+    
     private LocalDateTime createdAt;
 }

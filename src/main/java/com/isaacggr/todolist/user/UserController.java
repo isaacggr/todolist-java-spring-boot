@@ -10,12 +10,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.time.LocalDateTime;
+
 /**
  * Modificadores de acceso em java
  * public
  * private
  * protected
-*/
+ */
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -23,19 +26,20 @@ public class UserController {
     @Autowired
     private IUserRepository userRepository;
 
-    @PostMapping("/")
+    @PostMapping("/create")
     public ResponseEntity<UserModel> createUser(@RequestBody UserModel userModel) {
         var user = this.userRepository.findByUsername(userModel.getUsername());
 
         if (user != null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // User already exists
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         var passwordHashred = BCrypt.withDefaults()
             .hashToString(12, userModel.getPassword().toCharArray());
 
-        userModel.setPassword(passwordHashred); // Hash the password
-
+        userModel.setPassword(passwordHashred);
+        userModel.setCreatedAt(LocalDateTime.now());
+        
         var userCreated = this.userRepository.save(userModel);
         return ResponseEntity.ok(userCreated);
     }
