@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(originPatterns = {"https://isaacggr.github.io", "https://isaacggr.github.io/*", "http://localhost:[*]"}, 
+@CrossOrigin(originPatterns = {"https://todolist-frontend-dt9a.onrender.com", "https://todolist-frontend.onrender.com", "https://isaacggr.github.io", "https://isaacggr.github.io/*", "http://localhost:[*]"}, 
              allowCredentials = "true",
              maxAge = 3600)
 public class TestController {
@@ -30,7 +30,7 @@ public class TestController {
         response.put("cors_test", "success");
         response.put("message", "CORS está configurado corretamente");
         response.put("timestamp", System.currentTimeMillis());
-        response.put("allowed_origins", "Github Pages e localhost");
+        response.put("allowed_origins", "Github Pages e Render");
         return ResponseEntity.ok(response);
     }
 } 
