@@ -20,6 +20,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     // Padrões de origens permitidas
     private final List<String> allowedOriginPatterns = Arrays.asList(
+        "https://todolist-frontend-dt9a.onrender.com",
+        "https://todolist-frontend.onrender.com",
         "https://isaacggr.github.io",
         "https://isaacggr.github.io/*",
         "http://localhost:[*]"
@@ -28,7 +30,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("https://isaacggr.github.io", "https://isaacggr.github.io/*", "http://localhost:[*]")
+                .allowedOriginPatterns(
+                    "https://todolist-frontend-dt9a.onrender.com",
+                    "https://todolist-frontend.onrender.com",
+                    "https://isaacggr.github.io", 
+                    "https://isaacggr.github.io/*", 
+                    "http://localhost:[*]"
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization")
                 .exposedHeaders("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials")
