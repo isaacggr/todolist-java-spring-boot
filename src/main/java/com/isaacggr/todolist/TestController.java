@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(originPatterns = {"https://isaacggr.github.io", "https://isaacggr.github.io/*", "http://localhost:[*]"}, 
+             allowCredentials = "true",
+             maxAge = 3600)
 public class TestController {
 
     @GetMapping("/")
@@ -18,7 +20,7 @@ public class TestController {
         response.put("status", "online");
         response.put("message", "API TodoList está funcionando");
         response.put("version", "1.0.0");
-        response.put("cors", "enabled for all origins");
+        response.put("cors", "enabled for allowed origins");
         return ResponseEntity.ok(response);
     }
     
@@ -27,6 +29,8 @@ public class TestController {
         Map<String, Object> response = new HashMap<>();
         response.put("cors_test", "success");
         response.put("message", "CORS está configurado corretamente");
+        response.put("timestamp", System.currentTimeMillis());
+        response.put("allowed_origins", "Github Pages e localhost");
         return ResponseEntity.ok(response);
     }
 } 

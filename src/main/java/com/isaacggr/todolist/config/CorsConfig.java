@@ -7,6 +7,11 @@ import java.util.List;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -17,17 +22,20 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Configuração CORS otimizada para Spring Boot
+ * Permite requisições do GitHub Pages e mantém suporte a credenciais
+ */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@Configuration
 public class CorsConfig implements Filter {
     
-    // Lista das origens permitidas
-    private final List<String> allowedOrigins = Arrays.asList(
+    // Lista de padrões de origens permitidas
+    private final List<String> allowedOriginPatterns = Arrays.asList(
         "https://isaacggr.github.io",
-        "https://isaacggr.github.io/todolist-frontend", 
-        "https://isaacggr.github.io/todolist-frontend/",
-        "http://localhost:5500", 
-        "http://localhost:8080"
+        "https://isaacggr.github.io/*",
+        "http://localhost:[*]"
     );
     
     @Override
@@ -39,29 +47,17 @@ public class CorsConfig implements Filter {
         // Obter a origem da requisição
         String origin = request.getHeader("Origin");
         
-        // Log para debug da origem da requisição
-        System.out.println("Requisição recebida de origem: " + origin);
+        // Log da origem para depuração
+        System.out.println("Requisição recebida de: " + origin);
         
-        // Se a origem está na lista permitida, defina o cabeçalho Allow-Origin especificamente para ela
-        if (origin != null && (allowedOrigins.contains(origin) || originStartsWithAllowed(origin))) {
-            response.setHeader("Access-Control-Allow-Origin", origin);
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-            System.out.println("CORS permitido para: " + origin);
-        } else {
-            // Para outras origens, não permitimos credentials
-            response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Credentials", "false");
-            if (origin != null) {
-                System.out.println("CORS sem credenciais para: " + origin);
-            }
-        }
-        
-        // Outros cabeçalhos CORS comuns
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
+        // Configurar cabeçalhos CORS
+        response.setHeader("Access-Control-Allow-Origin", origin);
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
         response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
+        response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-XSRF-TOKEN");
         
-        // Tratamento especial para requisições OPTIONS (preflight)
+        // Tratar requisições preflight OPTIONS
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
         } else {
@@ -69,18 +65,32 @@ public class CorsConfig implements Filter {
         }
     }
     
-    // Verifica se a origem começa com alguma das origens permitidas
-    private boolean originStartsWithAllowed(String origin) {
-        return allowedOrigins.stream().anyMatch(origin::startsWith);
+    /**
+     * Configuração CORS via Spring Security
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        
+        // Configurar origens com padrões
+        configuration.setAllowedOriginPatterns(allowedOriginPatterns);
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
     
     @Override
     public void init(FilterConfig filterConfig) {
-        // Nada a fazer aqui
+        // Não requer inicialização
     }
     
     @Override
     public void destroy() {
-        // Nada a fazer aqui
+        // Não requer limpeza
     }
 } 
