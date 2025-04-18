@@ -1,6 +1,8 @@
 package com.isaacggr.todolist.config;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -19,14 +21,33 @@ import jakarta.servlet.http.HttpServletResponse;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsConfig implements Filter {
     
+    // Lista das origens permitidas
+    private final List<String> allowedOrigins = Arrays.asList(
+        "https://isaacggr.github.io", 
+        "http://localhost:5500", 
+        "http://localhost:8080"
+    );
+    
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
         
-        // Configuração de cabeçalhos CORS
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        // Obter a origem da requisição
+        String origin = request.getHeader("Origin");
+        
+        // Se a origem está na lista permitida, defina o cabeçalho Allow-Origin especificamente para ela
+        if (origin != null && allowedOrigins.contains(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+        } else {
+            // Para outras origens, não permitimos credentials
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            response.setHeader("Access-Control-Allow-Credentials", "false");
+        }
+        
+        // Outros cabeçalhos CORS comuns
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
