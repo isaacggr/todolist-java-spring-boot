@@ -23,8 +23,11 @@ public class FilterTaskAuth extends OncePerRequestFilter {
     private IUserRepository userRepository;
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request, 
+            @NonNull HttpServletResponse response, 
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
 
         var servletPath = request.getServletPath();
         
@@ -32,7 +35,7 @@ public class FilterTaskAuth extends OncePerRequestFilter {
             // Pegar a autenticação (usuario e senha)
             var authorization = request.getHeader("Authorization");
             
-            if(authorization == null) {
+            if (authorization == null) {
                 response.sendError(401, "Token de autorização não informado");
                 return;
             }

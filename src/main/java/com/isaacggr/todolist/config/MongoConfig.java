@@ -1,15 +1,18 @@
 package com.isaacggr.todolist.config;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import java.util.concurrent.TimeUnit;
+import org.springframework.lang.NonNull;
+
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 @Configuration
 public class MongoConfig extends AbstractMongoClientConfiguration {
@@ -18,12 +21,14 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
     private String mongoUri;
 
     @Override
+    @NonNull
     protected String getDatabaseName() {
         return "todolist";
     }
 
     @Override
     @Bean
+    @NonNull
     public MongoClient mongoClient() {
         ConnectionString connectionString = new ConnectionString(mongoUri);
         MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
