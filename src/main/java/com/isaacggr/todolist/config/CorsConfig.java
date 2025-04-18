@@ -23,7 +23,9 @@ public class CorsConfig implements Filter {
     
     // Lista das origens permitidas
     private final List<String> allowedOrigins = Arrays.asList(
-        "https://isaacggr.github.io", 
+        "https://isaacggr.github.io",
+        "https://isaacggr.github.io/todolist-frontend", 
+        "https://isaacggr.github.io/todolist-frontend/",
         "http://localhost:5500", 
         "http://localhost:8080"
     );
@@ -37,14 +39,21 @@ public class CorsConfig implements Filter {
         // Obter a origem da requisição
         String origin = request.getHeader("Origin");
         
+        // Log para debug da origem da requisição
+        System.out.println("Requisição recebida de origem: " + origin);
+        
         // Se a origem está na lista permitida, defina o cabeçalho Allow-Origin especificamente para ela
-        if (origin != null && allowedOrigins.contains(origin)) {
+        if (origin != null && (allowedOrigins.contains(origin) || originStartsWithAllowed(origin))) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Credentials", "true");
+            System.out.println("CORS permitido para: " + origin);
         } else {
             // Para outras origens, não permitimos credentials
             response.setHeader("Access-Control-Allow-Origin", "*");
             response.setHeader("Access-Control-Allow-Credentials", "false");
+            if (origin != null) {
+                System.out.println("CORS sem credenciais para: " + origin);
+            }
         }
         
         // Outros cabeçalhos CORS comuns
@@ -58,6 +67,11 @@ public class CorsConfig implements Filter {
         } else {
             chain.doFilter(req, res);
         }
+    }
+    
+    // Verifica se a origem começa com alguma das origens permitidas
+    private boolean originStartsWithAllowed(String origin) {
+        return allowedOrigins.stream().anyMatch(origin::startsWith);
     }
     
     @Override
