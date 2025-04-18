@@ -1,5 +1,7 @@
 package com.isaacggr.todolist.config;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,14 +16,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     @Value("${cors.allowed-origins:*}")
-    private String allowedOrigins;
+    private String allowedOriginsString;
 
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(allowedOrigins)
+                .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT")
-                .allowedHeaders("*");
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
     
     @Bean
@@ -29,13 +33,13 @@ public class WebConfig implements WebMvcConfigurer {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Permitir origens, cabeçalhos e métodos
-        config.addAllowedOrigin(allowedOrigins);
+        // Permitir qualquer origem (mais permissivo)
+        config.setAllowedOriginPatterns(Collections.singletonList("*"));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         
         // Permitir credenciais (cookies, autorização, etc)
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(true);
         
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
