@@ -1,0 +1,32 @@
+# Arquivos do Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Arquivos de IDEs e editores
+.idea/
+.vscode/
+*.iws
+*.iml
+*.ipr
+.project
+.settings
+.classpath
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Frontend
+/frontend/
+/todolist-frontend/
+
+# Arquivos de log
+*.log
+
+# Configs locais
+application-dev.properties
+application-local.properties
+
+# Git
+.git/
+.gitignore 

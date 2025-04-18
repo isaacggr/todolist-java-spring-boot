@@ -1,0 +1,19 @@
+services:
+   # Serviço principal (API)
+   - type: web
+     name: todolist-api
+     env: docker
+     region: oregon # Você pode alternar para outra região se preferir
+     plan: free # Plano gratuito, pode ser alterado para starter/standard para ambiente de produção
+     branch: main
+     dockerfilePath: ./Dockerfile
+     numInstances: 1
+     healthCheckPath: /
+     envVars:
+        - key: MONGODB_URI
+          sync: false # Isso indica que você definirá este valor manualmente no painel do Render
+        - key: ALLOWED_ORIGINS
+          value: '*' # Permitir todas as origens para desenvolvimento
+        - key: SPRING_PROFILES_ACTIVE
+          value: prod
+     autoDeploy: true # Ativa deploys automáticos quando houver push na branch principal
